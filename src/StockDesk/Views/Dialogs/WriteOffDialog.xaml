@@ -1,0 +1,179 @@
+<Window x:Class="StockDesk.Views.Dialogs.WriteOffDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vm="clr-namespace:StockDesk.ViewModels"
+        xmlns:converters="clr-namespace:StockDesk.Common.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:WriteOffDialogViewModel}"
+        Title="Məhsulun Təhvil Verilməsi (Məxaric)"
+        Height="560" Width="620"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Window.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Məhsulun Təhvil Verilməsi (Məxaric)"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,16" />
+
+        <!-- Items list -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8"
+                Margin="0,0,0,16">
+            <ListView ItemsSource="{Binding Items}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="4,6">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="50" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="130" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Thumbnail -->
+                            <Border Grid.Column="0"
+                                    Width="42" Height="42"
+                                    CornerRadius="4"
+                                    Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                    ClipToBounds="True">
+                                <Grid>
+                                    <ui:SymbolIcon Symbol="Image24"
+                                                   FontSize="20"
+                                                   Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center"
+                                                   Visibility="{Binding Product.ImageSource, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=invert, Mode=OneWay}" />
+                                    <Image Source="{Binding Product.ImageSource}"
+                                           Stretch="UniformToFill"
+                                           Visibility="{Binding Product.ImageSource, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}" />
+                                </Grid>
+                            </Border>
+
+                            <!-- Name & Category -->
+                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0">
+                                <TextBlock Text="{Binding Product.Name}"
+                                           FontWeight="Medium"
+                                           FontSize="14" />
+                                <TextBlock Text="{Binding Product.CategoryName}"
+                                           FontSize="12"
+                                           Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                            </StackPanel>
+
+                            <!-- Current Stock -->
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center" Margin="10,0" HorizontalAlignment="Right">
+                                <TextBlock Text="Mövcud qalıq:"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <TextBlock Text="{Binding Product.CurrentBalance, StringFormat='{}{0} ədəd'}"
+                                           FontWeight="SemiBold"
+                                           FontSize="13" />
+                            </StackPanel>
+
+                            <!-- Write-off quantity input -->
+                            <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="10,0,0,0">
+                                <TextBlock Text="Silinən say:"
+                                           FontSize="11"
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay}"
+                                              Minimum="1"
+                                              Maximum="{Binding Product.CurrentBalance}"
+                                              SpinButtonPlacementMode="Inline"
+                                              SmallChange="1" />
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+
+        <!-- Recipient & Note Fields -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,8">
+            <StackPanel>
+                <!-- Recipient ComboBox with text input & auto-complete -->
+                <StackPanel Margin="0,0,0,12">
+                    <TextBlock Text="Təhvil alan şəxs və ya şöbə *"
+                               FontWeight="Medium"
+                               Margin="0,0,0,4" />
+                    <ComboBox ItemsSource="{Binding RecipientSuggestions}"
+                              Text="{Binding RecipientName, UpdateSourceTrigger=PropertyChanged}"
+                              IsEditable="True"
+                              IsTextSearchEnabled="True"
+                              HorizontalAlignment="Stretch" />
+                    <TextBlock Text="İpucu: Siyahıdan seçə və ya yeni şəxs/şöbə adı yaza bilərsiniz (avtomatik yadda saxlanılacaq)."
+                               FontSize="11"
+                               Margin="0,4,0,0"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
+                </StackPanel>
+
+                <!-- Note input -->
+                <StackPanel>
+                    <TextBlock Text="Qeyd (istəyə bağlı)"
+                               FontWeight="Medium"
+                               Margin="0,0,0,4" />
+                    <ui:TextBox PlaceholderText="Məsələn: IT şöbəsinə istifadə üçün verildi..."
+                                Text="{Binding Note, UpdateSourceTrigger=PropertyChanged}" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+        <!-- Error message -->
+        <TextBlock Grid.Row="3"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="#DC3545"
+                   FontWeight="Medium"
+                   Margin="0,4,0,0"
+                   TextWrapping="Wrap"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <!-- Buttons -->
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <ui:Button Content="Ləğv et"
+                       Appearance="Secondary"
+                       Click="OnCancelClick"
+                       Width="100"
+                       Margin="0,0,10,0" />
+            <ui:Button Content="Təhvil ver (Təsdiqlə)"
+                       Appearance="Primary"
+                       Icon="{ui:SymbolIcon Send24}"
+                       Click="OnConfirmClick"
+                       Width="180" />
+        </StackPanel>
+    </Grid>
+</Window>

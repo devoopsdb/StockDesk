@@ -1,0 +1,354 @@
+<Window x:Class="StockDesk.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vm="clr-namespace:StockDesk.ViewModels"
+        xmlns:converters="clr-namespace:StockDesk.Common.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:MainViewModel}"
+        Title="StockDesk - Operativ Anbar Uçotu"
+        Height="720" Width="1100"
+        MinHeight="600" MinWidth="900"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Window.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <converters:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVis" />
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Top App Bar -->
+            <RowDefinition Height="Auto" />
+            <!-- Summary Stats Bar -->
+            <RowDefinition Height="Auto" />
+            <!-- Product Catalog Grid -->
+            <RowDefinition Height="*" />
+            <!-- Bottom Bulk Action Bar -->
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- TOP APP BAR -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="0,0,0,1"
+                Padding="20,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <!-- Search Input -->
+                    <ColumnDefinition Width="260" />
+                    <!-- Category Filter -->
+                    <ColumnDefinition Width="200" />
+                    <!-- Sort Option -->
+                    <ColumnDefinition Width="180" />
+                    <!-- Spacer -->
+                    <ColumnDefinition Width="*" />
+                    <!-- Action Buttons -->
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Search Input -->
+                <ui:TextBox Grid.Column="0"
+                            PlaceholderText="Məhsul və ya kateqoriya axtar..."
+                            Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                            Icon="{ui:SymbolIcon Search24}"
+                            Margin="0,0,12,0" />
+
+                <!-- Category Filter -->
+                <ComboBox Grid.Column="1"
+                          ItemsSource="{Binding CategoryFilters}"
+                          SelectedItem="{Binding SelectedCategoryFilter}"
+                          DisplayMemberPath="Name"
+                          Margin="0,0,12,0" />
+
+                <!-- Sort Option -->
+                <ComboBox Grid.Column="2"
+                          ItemsSource="{Binding SortOptions}"
+                          SelectedItem="{Binding SelectedSortOption}"
+                          Margin="0,0,12,0" />
+
+                <!-- Action Buttons -->
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <ui:Button Content="+ Kateqoriya"
+                               Icon="{ui:SymbolIcon Tag24}"
+                               Appearance="Secondary"
+                               Command="{Binding OpenAddCategoryCommand}"
+                               Margin="0,0,8,0" />
+
+                    <ui:Button Content="+ Yeni məhsul"
+                               Icon="{ui:SymbolIcon Add24}"
+                               Appearance="Primary"
+                               Command="{Binding OpenAddProductCommand}"
+                               Margin="0,0,8,0" />
+
+                    <ui:Button Content="Tarixçə"
+                               Icon="{ui:SymbolIcon History24}"
+                               Appearance="Secondary"
+                               Command="{Binding OpenHistoryCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- SUMMARY STATS BAR -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                Padding="20,8">
+            <Grid>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Margin="0,0,20,0">
+                        <Run Text="Göstərilən məhsul növü: " />
+                        <Run Text="{Binding TotalItemsCount}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                    </TextBlock>
+                    <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}">
+                        <Run Text="Ümumi qalıq sayı: " />
+                        <Run Text="{Binding TotalStockSum}" FontWeight="SemiBold" Foreground="{DynamicResource TextFillColorPrimaryBrush}" />
+                        <Run Text=" ədəd" />
+                    </TextBlock>
+                </StackPanel>
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Hamısını seç"
+                            Click="OnSelectAllClick"
+                            Padding="8,2"
+                            FontSize="11"
+                            Margin="0,0,8,0" />
+                    <Button Content="Seçimi ləğv et"
+                            Click="OnClearSelectionClick"
+                            Padding="8,2"
+                            FontSize="11" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- PRODUCT CATALOG GRID -->
+        <Grid Grid.Row="2" Margin="20,12,20,12">
+            <!-- Empty state -->
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Visibility="{Binding FilteredProducts.Count, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=invert}">
+                <ui:SymbolIcon Symbol="Box24"
+                               FontSize="64"
+                               Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                               Margin="0,0,0,12" />
+                <TextBlock Text="Heç bir məhsul tapılmadı"
+                           FontSize="18"
+                           FontWeight="Medium"
+                           HorizontalAlignment="Center"
+                           Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                           Margin="0,0,0,12" />
+                <ui:Button Content="+ İlk məhsulu əlavə et"
+                           Appearance="Primary"
+                           HorizontalAlignment="Center"
+                           Command="{Binding OpenAddProductCommand}" />
+            </StackPanel>
+
+            <!-- Products DataGrid -->
+            <DataGrid ItemsSource="{Binding FilteredProducts}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                      Background="Transparent"
+                      RowBackground="Transparent"
+                      AlternatingRowBackground="{DynamicResource SubtleFillColorSecondaryBrush}"
+                      BorderThickness="1"
+                      BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                      RowHeight="54"
+                      SelectionMode="Single"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto">
+                <DataGrid.Columns>
+                    <!-- Selection Checkbox -->
+                    <DataGridTemplateColumn Width="48">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Photo + Name -->
+                    <DataGridTemplateColumn Header="Məhsul" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Grid Margin="4,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="42" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Thumbnail -->
+                                    <Border Grid.Column="0"
+                                            Width="38" Height="38"
+                                            CornerRadius="4"
+                                            Background="{DynamicResource SubtleFillColorSecondaryBrush}"
+                                            ClipToBounds="True">
+                                        <Grid>
+                                            <ui:SymbolIcon Symbol="Image24"
+                                                           FontSize="18"
+                                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                                           HorizontalAlignment="Center"
+                                                           VerticalAlignment="Center"
+                                                           Visibility="{Binding ImageSource, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=invert, Mode=OneWay}" />
+                                            <Image Source="{Binding ImageSource}"
+                                                   Stretch="UniformToFill"
+                                                   Visibility="{Binding ImageSource, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}" />
+                                        </Grid>
+                                    </Border>
+
+                                    <!-- Product Name -->
+                                    <TextBlock Grid.Column="1"
+                                               Text="{Binding Name}"
+                                               FontWeight="SemiBold"
+                                               FontSize="14"
+                                               VerticalAlignment="Center"
+                                               Margin="12,0,0,0" />
+                                </Grid>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Category -->
+                    <DataGridTemplateColumn Header="Kateqoriya" Width="170">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Border Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                                        BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        Padding="8,3"
+                                        HorizontalAlignment="Left"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CategoryName}"
+                                               FontSize="12"
+                                               FontWeight="Medium"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Current Balance -->
+                    <DataGridTemplateColumn Header="Qalıq" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding CurrentBalance}"
+                                               FontWeight="Bold"
+                                               FontSize="15"
+                                               Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                               Margin="0,0,4,0" />
+                                    <TextBlock Text="ədəd"
+                                               FontSize="12"
+                                               VerticalAlignment="Bottom"
+                                               Margin="0,0,0,1"
+                                               Foreground="{DynamicResource TextFillColorSecondaryBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <!-- Created Date -->
+                    <DataGridTextColumn Header="Əlavə tarixi"
+                                        Binding="{Binding CreatedAt, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
+                                        Width="140" />
+
+                    <!-- Actions Column -->
+                    <DataGridTemplateColumn Header="Əməliyyat" Width="260">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal"
+                                            VerticalAlignment="Center"
+                                            Margin="4,0">
+                                    <!-- Write-off Button -->
+                                    <ui:Button Content="Təhvil ver"
+                                               Appearance="Primary"
+                                               Icon="{ui:SymbolIcon Send24}"
+                                               ToolTip="Məhsulu təhvil ver (Məxaric)"
+                                               Command="{Binding DataContext.WriteOffSingleCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Padding="8,4"
+                                               Margin="0,0,6,0" />
+
+                                    <!-- Replenish Button -->
+                                    <ui:Button Icon="{ui:SymbolIcon Add24}"
+                                               Appearance="Secondary"
+                                               ToolTip="Qalığı artır (Mədaxil)"
+                                               Command="{Binding DataContext.ReplenishStockCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Padding="6,4"
+                                               Margin="0,0,6,0" />
+
+                                    <!-- Edit Button -->
+                                    <ui:Button Icon="{ui:SymbolIcon Edit24}"
+                                               Appearance="Secondary"
+                                               ToolTip="Məhsula düzəliş et"
+                                               Command="{Binding DataContext.EditProductCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Padding="6,4"
+                                               Margin="0,0,6,0" />
+
+                                    <!-- Delete Button -->
+                                    <ui:Button Icon="{ui:SymbolIcon Delete24}"
+                                               Appearance="Danger"
+                                               ToolTip="Məhsulu sil"
+                                               Command="{Binding DataContext.DeleteProductCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                               CommandParameter="{Binding}"
+                                               Padding="6,4" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+
+        <!-- BOTTOM BULK ACTION BAR (Visible when SelectedCount >= 2) -->
+        <Border Grid.Row="3"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource AccentFillColorDefaultBrush}"
+                BorderThickness="0,2,0,0"
+                Padding="24,14"
+                Visibility="{Binding IsBulkActionBarVisible, Converter={StaticResource BoolToVis}}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ui:SymbolIcon Symbol="CheckmarkCircle24"
+                                   Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}"
+                                   FontSize="22"
+                                   Margin="0,0,10,0" />
+                    <TextBlock Text="{Binding SelectedCount, StringFormat='{}Seçilmiş məhsullar: {0} ədəd'}"
+                               FontSize="15"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <ui:Button Content="Seçimi təmizlə"
+                               Appearance="Secondary"
+                               Command="{Binding ClearSelectionCommand}"
+                               Margin="0,0,12,0" />
+
+                    <ui:Button Content="{Binding SelectedCount, StringFormat='{}📤 Seçilmişləri təhvil ver ({0})'}"
+                               Appearance="Primary"
+                               FontSize="14"
+                               FontWeight="SemiBold"
+                               Padding="16,6"
+                               Command="{Binding WriteOffBulkCommand}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,130 @@
+<Window x:Class="StockDesk.Views.Dialogs.CategoryDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
+        xmlns:vm="clr-namespace:StockDesk.ViewModels"
+        xmlns:converters="clr-namespace:StockDesk.Common.Converters"
+        mc:Ignorable="d"
+        d:DataContext="{d:DesignInstance vm:CategoryDialogViewModel}"
+        Title="Kateqoriyaların İdarə Edilməsi"
+        Height="500" Width="550"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Background="{DynamicResource ApplicationBackgroundBrush}"
+        Foreground="{DynamicResource TextFillColorPrimaryBrush}">
+
+    <Window.Resources>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid Margin="24">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Title -->
+        <TextBlock Grid.Row="0"
+                   Text="Kateqoriyalar"
+                   FontSize="20"
+                   FontWeight="SemiBold"
+                   Margin="0,0,0,16" />
+
+        <!-- Add Category Section -->
+        <Border Grid.Row="1"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="16"
+                Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ui:TextBox Grid.Column="0"
+                            PlaceholderText="Yeni kateqoriyanın adını daxil edin..."
+                            Text="{Binding NewCategoryName, UpdateSourceTrigger=PropertyChanged}"
+                            Icon="{ui:SymbolIcon Tag24}"
+                            Margin="0,0,12,0" />
+
+                <ui:Button Grid.Column="1"
+                           Content="Əlavə et"
+                           Icon="{ui:SymbolIcon Add24}"
+                           Appearance="Primary"
+                           Command="{Binding AddCategoryCommand}" />
+            </Grid>
+        </Border>
+
+        <!-- Category List -->
+        <Border Grid.Row="2"
+                Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8">
+            <ListView ItemsSource="{Binding Categories}"
+                      SelectedItem="{Binding SelectedCategory}"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Margin="8,4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <ui:SymbolIcon Grid.Column="0"
+                                           Symbol="Tag24"
+                                           Margin="0,0,12,0"
+                                           Foreground="{DynamicResource AccentTextFillColorPrimaryBrush}" />
+
+                            <TextBlock Grid.Column="1"
+                                       Text="{Binding Name}"
+                                       VerticalAlignment="Center"
+                                       FontSize="14"
+                                       FontWeight="Medium" />
+
+                            <ui:Button Grid.Column="2"
+                                       Appearance="Danger"
+                                       Icon="{ui:SymbolIcon Delete24}"
+                                       ToolTip="Kateqoriyanı sil"
+                                       Command="{Binding DataContext.DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=Window}}"
+                                       CommandParameter="{Binding}"
+                                       Padding="6,4" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </Border>
+
+        <!-- Error Message -->
+        <TextBlock Grid.Row="3"
+                   Text="{Binding ErrorMessage}"
+                   Foreground="#DC3545"
+                   FontWeight="Medium"
+                   Margin="0,12,0,0"
+                   TextWrapping="Wrap"
+                   Visibility="{Binding ErrorMessage, Converter={StaticResource NullToVisibilityConverter}}" />
+
+        <!-- Close Button -->
+        <StackPanel Grid.Row="4"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <ui:Button Content="Bağla"
+                       Appearance="Secondary"
+                       Click="OnCloseClick"
+                       Width="100" />
+        </StackPanel>
+    </Grid>
+</Window>
