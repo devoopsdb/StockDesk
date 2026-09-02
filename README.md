@@ -123,8 +123,8 @@ dotnet test --logger "console;verbosity=detailed"
 
 The repository includes a unified GitHub Actions workflow ([`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)) running on `windows-latest`:
 
-- **CI (Pull Requests & Pushes):** Automatically restores, builds, and runs all unit tests.
-- **CD (Release Publishing):** Triggered on version tags (e.g., `v1.0.0`) or manual workflow dispatch:
+- **Triggered on version tags (e.g., `v1.0.0`) or manual workflow dispatch:**
+  - Automatically restores, builds, and runs all unit tests.
   - Publishes a self-contained, single-file Windows x64 binary.
   - Digitally signs executables and installers with Authenticode SHA-256 + RFC 3161 timestamps.
   - Packages a user-level single-click installer (`StockDesk-Setup.exe`) and portable ZIP via **Velopack**.
