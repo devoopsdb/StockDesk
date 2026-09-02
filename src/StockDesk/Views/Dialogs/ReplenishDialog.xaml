@@ -74,7 +74,7 @@
                 <TextBlock Text="Əlavə ediləcək say *"
                            FontWeight="Medium"
                            Margin="0,0,0,6" />
-                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay}"
+                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                               Minimum="1"
                               SpinButtonPlacementMode="Inline"
                               SmallChange="1"

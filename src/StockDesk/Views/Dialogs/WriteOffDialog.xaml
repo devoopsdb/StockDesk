@@ -102,7 +102,7 @@
                                 <TextBlock Text="Silinən say:"
                                            FontSize="11"
                                            Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay}"
+                                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                               Minimum="1"
                                               Maximum="{Binding Product.CurrentBalance}"
                                               SpinButtonPlacementMode="Inline"

@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using StockDesk.ViewModels;
 
 namespace StockDesk.Views.Dialogs;
@@ -15,6 +16,11 @@ public partial class WriteOffDialog : Window
 
     private async void OnConfirmClick(object sender, RoutedEventArgs e)
     {
+        if (sender is UIElement element)
+        {
+            FocusManager.SetFocusedElement(this, element);
+        }
+
         await ViewModel.ConfirmWriteOffCommand.ExecuteAsync(null);
         if (ViewModel.IsSaved)
         {

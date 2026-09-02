@@ -120,7 +120,7 @@
                     <TextBlock Text="İlkin say (qalıq)"
                                FontWeight="Medium"
                                Margin="0,0,0,6" />
-                    <ui:NumberBox Value="{Binding InitialQuantity, Mode=TwoWay}"
+                    <ui:NumberBox Value="{Binding InitialQuantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                   Minimum="0"
                                   SpinButtonPlacementMode="Inline"
                                   SmallChange="1"

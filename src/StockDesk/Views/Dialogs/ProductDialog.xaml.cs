@@ -1,4 +1,5 @@
 using System.Windows;
+using System.Windows.Input;
 using StockDesk.ViewModels;
 
 namespace StockDesk.Views.Dialogs;
@@ -15,6 +16,11 @@ public partial class ProductDialog : Window
 
     private async void OnSaveClick(object sender, RoutedEventArgs e)
     {
+        if (sender is UIElement element)
+        {
+            FocusManager.SetFocusedElement(this, element);
+        }
+
         bool success = await ViewModel.SaveAsync();
         if (success)
         {
