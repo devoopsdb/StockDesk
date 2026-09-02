@@ -122,31 +122,12 @@ try {
         Write-Host "Signing: $resolvedFile" -ForegroundColor Cyan
 
         if ($signtool) {
-            $signArgs = @(
-                "sign",
-                "/f", $actualPfxPath,
-                "/p", $CertPassword,
-                "/fd", "SHA256",
-                "/tr", $TimestampServer,
-                "/td", "SHA256",
-                "/d", $Description,
-                $resolvedFile
-            )
-
-            $proc = Start-Process -FilePath $signtool -ArgumentList $signArgs -Wait -NoNewWindow -PassThru
-            if ($proc.ExitCode -ne 0) {
-                Write-Warning "SignTool failed with exit code $($proc.ExitCode). Retrying without timestamp..."
-                $signArgsNoTs = @(
-                    "sign",
-                    "/f", $actualPfxPath,
-                    "/p", $CertPassword,
-                    "/fd", "SHA256",
-                    "/d", $Description,
-                    $resolvedFile
-                )
-                $proc2 = Start-Process -FilePath $signtool -ArgumentList $signArgsNoTs -Wait -NoNewWindow -PassThru
-                if ($proc2.ExitCode -ne 0) {
-                    throw "SignTool failed to sign $resolvedFile (Exit code: $($proc2.ExitCode))"
+            & $signtool sign /f $actualPfxPath /p $CertPassword /fd SHA256 /tr $TimestampServer /td SHA256 /d $Description $resolvedFile
+            if ($LASTEXITCODE -ne 0) {
+                Write-Warning "SignTool failed with exit code $LASTEXITCODE. Retrying without timestamp..."
+                & $signtool sign /f $actualPfxPath /p $CertPassword /fd SHA256 /d $Description $resolvedFile
+                if ($LASTEXITCODE -ne 0) {
+                    throw "SignTool failed to sign $resolvedFile (Exit code: $LASTEXITCODE)"
                 }
             }
         } else {
