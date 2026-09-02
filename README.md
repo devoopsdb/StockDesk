@@ -1,5 +1,6 @@
 # StockDesk 📦
 
+[![GitHub Release](https://img.shields.io/github/v/release/devoopsdb/StockDesk?logo=github&color=blue)](https://github.com/devoopsdb/StockDesk/releases)
 [![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4?logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
 [![WPF](https://img.shields.io/badge/UI-WPF%20%2B%20WPF--UI-0078D4?logo=windows&logoColor=white)](https://github.com/lepoco/wpfui)
 [![SQLite](https://img.shields.io/badge/Database-SQLite%20(WAL)-003B57?logo=sqlite&logoColor=white)](https://sqlite.org/)
@@ -75,7 +76,17 @@ All application data is isolated within the user's local application data folder
 
 ## 🚀 Getting Started
 
-### Prerequisites
+### 📥 Download & Installation (Recommended)
+
+Download the latest version directly from the **[StockDesk GitHub Releases](https://github.com/devoopsdb/StockDesk/releases/latest)**:
+
+1. Download **`StockDesk-Setup.exe`** for single-click installation with automatic updates, or **`StockDesk-win-x64.zip`** for a portable standalone version.
+2. Run `StockDesk-Setup.exe` — the app installs seamlessly into `%LocalAppData%` without administrator privileges.
+3. Subsequent updates will be delivered and applied automatically in the background via GitHub Releases!
+
+---
+
+### Prerequisites (For Developers)
 - Windows 10 / 11 (64-bit)
 - [.NET 10 SDK](https://dotnet.microsoft.com/download/dotnet/10.0) or runtime
 
@@ -83,7 +94,7 @@ All application data is isolated within the user's local application data folder
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/your-username/StockDesk.git
+   git clone https://github.com/devoopsdb/StockDesk.git
    cd StockDesk
    ```
 
