@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -7,6 +8,7 @@ using StockDesk.Data;
 using StockDesk.Services;
 using StockDesk.ViewModels;
 using StockDesk.Views;
+using Velopack;
 
 namespace StockDesk;
 
@@ -16,6 +18,9 @@ public partial class App : Application
 
     public App()
     {
+        // Velopack application lifecycle handler (must be called before app initialization)
+        VelopackApp.Build().Run();
+
         _host = Host.CreateDefaultBuilder()
             .ConfigureServices((context, services) =>
             {
@@ -30,6 +35,7 @@ public partial class App : Application
                 services.AddScoped<IRecipientService, RecipientService>();
                 services.AddScoped<IInventoryService, InventoryService>();
                 services.AddSingleton<IDialogService, DialogService>();
+                services.AddSingleton<IUpdateService, UpdateService>();
 
                 // ViewModels
                 services.AddSingleton<MainViewModel>();
@@ -61,6 +67,24 @@ public partial class App : Application
         // Show Main Window
         var mainWindow = _host.Services.GetRequiredService<MainWindow>();
         mainWindow.Show();
+
+        // Check for updates in background (non-blocking)
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                var updateService = _host.Services.GetRequiredService<IUpdateService>();
+                var check = await updateService.CheckForUpdatesAsync();
+                if (check.IsUpdateAvailable)
+                {
+                    await updateService.DownloadUpdatesAsync();
+                }
+            }
+            catch
+            {
+                // Background update check should never crash the main application
+            }
+        });
     }
 
     protected override async void OnExit(ExitEventArgs e)

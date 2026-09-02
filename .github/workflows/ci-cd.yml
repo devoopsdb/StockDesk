@@ -1,0 +1,158 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "master" ]
+    tags: [ "v*.*.*" ]
+  pull_request:
+    branches: [ "main", "master" ]
+  workflow_dispatch:
+    inputs:
+      release_version:
+        description: 'Release version (e.g. 1.0.0). If empty and tag not present, defaults to 1.0.0'
+        required: false
+        type: string
+        default: ''
+      force_release:
+        description: 'Force publish GitHub Release'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  # -------------------------------------------------------------
+  # 1. CI Validation: Build & Unit Tests
+  # -------------------------------------------------------------
+  build-and-test:
+    name: Build & Test
+    runs-on: windows-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore StockDesk.sln
+
+      - name: Build Solution (Release)
+        run: dotnet build StockDesk.sln --configuration Release --no-restore
+
+      - name: Run Unit Tests
+        run: dotnet test StockDesk.sln --configuration Release --no-build --verbosity normal
+
+  # -------------------------------------------------------------
+  # 2. CD Release: Publish, Code Sign, Velopack Installer & GitHub Release
+  # -------------------------------------------------------------
+  release:
+    name: Build, Sign & Publish Release
+    needs: build-and-test
+    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_release == true)
+    runs-on: windows-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Install Velopack CLI (vpk)
+        run: dotnet tool install -g vpk
+
+      - name: Determine Version
+        id: get_version
+        shell: pwsh
+        run: |
+          $ver = "${{ github.event.inputs.release_version }}"
+          if (-not $ver) {
+            if ($env:GITHUB_REF -match "refs/tags/v?(.*)") {
+              $ver = $Matches[1]
+            } else {
+              $ver = "1.0.0"
+            }
+          }
+          Write-Host "Resolved release version: $ver"
+          "VERSION=$ver" >> $env:GITHUB_ENV
+
+      - name: Publish Self-Contained Win-x64 Binary
+        run: >
+          dotnet publish src/StockDesk/StockDesk.csproj
+          -c Release
+          -r win-x64
+          --self-contained true
+          -p:Version=${{ env.VERSION }}
+          -p:AssemblyVersion=${{ env.VERSION }}.0
+          -p:FileVersion=${{ env.VERSION }}.0
+          -o ./publish
+
+      - name: Sign Main Application Binary
+        shell: pwsh
+        env:
+          CODE_SIGN_CERT_BASE64: ${{ secrets.CODE_SIGN_CERT_BASE64 }}
+          CODE_SIGN_PASSWORD: ${{ secrets.CODE_SIGN_PASSWORD }}
+        run: |
+          ./scripts/sign-binary.ps1 -FilePaths "./publish/StockDesk.exe" -Description "StockDesk"
+
+      - name: Package with Velopack
+        shell: pwsh
+        run: |
+          vpk pack -u StockDesk -v ${{ env.VERSION }} -p ./publish -e StockDesk.exe --packTitle "StockDesk" -o ./releases
+
+      - name: Sign Velopack Setup Installer
+        shell: pwsh
+        env:
+          CODE_SIGN_CERT_BASE64: ${{ secrets.CODE_SIGN_CERT_BASE64 }}
+          CODE_SIGN_PASSWORD: ${{ secrets.CODE_SIGN_PASSWORD }}
+        run: |
+          $setupExe = Get-ChildItem -Path ./releases -Filter "*Setup.exe" | Select-Object -First 1
+          if ($setupExe) {
+            ./scripts/sign-binary.ps1 -FilePaths $setupExe.FullName -Description "StockDesk Installer"
+          }
+
+      - name: Create Portable ZIP Archive
+        shell: pwsh
+        run: |
+          Compress-Archive -Path ./publish/* -DestinationPath ./releases/StockDesk-win-x64.zip -Force
+
+      - name: Generate Public Certificate for Distribution
+        shell: pwsh
+        run: |
+          $cerPath = "./releases/StockDesk-Certificate.cer"
+          if (Test-Path "./scripts/StockDesk.cer") {
+            Copy-Item "./scripts/StockDesk.cer" -Destination $cerPath -Force
+          } else {
+            # Extract public cert if PFX is available in secret
+            if ($env:CODE_SIGN_CERT_BASE64) {
+              $tempPfx = [System.IO.Path]::GetTempFileName()
+              [System.IO.File]::WriteAllBytes($tempPfx, [Convert]::FromBase64String($env:CODE_SIGN_CERT_BASE64))
+              $cert = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2($tempPfx, "${{ secrets.CODE_SIGN_PASSWORD }}")
+              Export-Certificate -Cert $cert -FilePath $cerPath | Out-Null
+              Remove-Item $tempPfx -Force -ErrorAction SilentlyContinue
+            }
+          }
+        env:
+          CODE_SIGN_CERT_BASE64: ${{ secrets.CODE_SIGN_CERT_BASE64 }}
+          CODE_SIGN_PASSWORD: ${{ secrets.CODE_SIGN_PASSWORD }}
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || format('v{0}', env.VERSION) }}
+          name: StockDesk v${{ env.VERSION }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            ./releases/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

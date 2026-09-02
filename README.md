@@ -119,6 +119,53 @@ dotnet test --logger "console;verbosity=detailed"
 
 ---
 
+## 🔄 CI/CD & Automated Releases
+
+The repository includes a unified GitHub Actions workflow ([`.github/workflows/ci-cd.yml`](.github/workflows/ci-cd.yml)) running on `windows-latest`:
+
+- **CI (Pull Requests & Pushes):** Automatically restores, builds, and runs all unit tests.
+- **CD (Release Publishing):** Triggered on version tags (e.g., `v1.0.0`) or manual workflow dispatch:
+  - Publishes a self-contained, single-file Windows x64 binary.
+  - Digitally signs executables and installers with Authenticode SHA-256 + RFC 3161 timestamps.
+  - Packages a user-level single-click installer (`StockDesk-Setup.exe`) and portable ZIP via **Velopack**.
+  - Publishes a **GitHub Release** with auto-generated release notes and attached release assets.
+
+### 📦 Seamless Auto-Updates
+StockDesk includes background auto-updates powered by **Velopack**. When a new release is published to GitHub Releases:
+- The app checks for updates in the background upon launch without interrupting the user.
+- Downloads delta updates automatically.
+- Seamlessly applies the update on the next restart without requiring administrator privileges (UAC).
+
+---
+
+## 🔐 Code Signing & Secrets Configuration
+
+### 1. Generating a Code Signing Certificate
+To create a self-signed Code Signing certificate for your repository:
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\generate-cert.ps1
+```
+The script will generate `StockDesk.pfx`, `StockDesk.cer`, and print the Base64 representation of the certificate.
+
+### 2. GitHub Secrets Setup
+In your GitHub repository, navigate to **Settings -> Secrets and variables -> Actions** and add the following repository secrets:
+
+| Secret Name | Description |
+| :--- | :--- |
+| `CODE_SIGN_CERT_BASE64` | Base64-encoded string of your `.pfx` certificate |
+| `CODE_SIGN_PASSWORD` | Password used to protect the `.pfx` file |
+
+> **Note:** If these secrets are not configured, the CI/CD pipeline automatically generates an on-the-fly fallback certificate during the release build to ensure packaging always succeeds.
+
+### 3. Trusting the Self-Signed Certificate (Clients)
+To eliminate Windows SmartScreen warnings for self-signed builds, users can import the public `StockDesk-Certificate.cer` (attached to each GitHub Release) into the Trusted Root Certification Authorities store:
+```powershell
+Import-Certificate -FilePath .\StockDesk-Certificate.cer -CertStoreLocation Cert:\CurrentUser\Root
+```
+
+---
+
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
