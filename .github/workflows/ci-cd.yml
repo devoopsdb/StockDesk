@@ -98,7 +98,7 @@ jobs:
       - name: Package with Velopack
         shell: pwsh
         run: |
-          vpk pack -u StockDesk -v ${{ env.VERSION }} -p ./publish -e StockDesk.exe --packTitle "StockDesk" -o ./releases
+          vpk pack -u StockDesk -v ${{ env.VERSION }} -p ./publish -e StockDesk.exe --packTitle "StockDesk" --icon src/StockDesk/Assets/AppIcon.ico -o ./releases
 
       - name: Sign Velopack Setup Installer
         shell: pwsh

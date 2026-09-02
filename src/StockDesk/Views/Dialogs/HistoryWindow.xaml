@@ -9,6 +9,7 @@
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:HistoryViewModel}"
         Title="Əməliyyat Tarixçəsi və Jurnal"
+        Icon="pack://application:,,,/Assets/AppIcon.ico"
         Height="650" Width="950"
         WindowStartupLocation="CenterOwner"
         Background="{DynamicResource ApplicationBackgroundBrush}"
