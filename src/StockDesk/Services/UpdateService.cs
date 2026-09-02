@@ -14,7 +14,7 @@ public class UpdateService : IUpdateService
     private readonly UpdateManager? _updateManager;
     private UpdateInfo? _lastUpdateInfo;
 
-    public UpdateService(ILogger<UpdateService>? logger = null, string githubRepoUrl = "https://github.com/mhajizada/StockDesk")
+    public UpdateService(ILogger<UpdateService>? logger = null, string githubRepoUrl = "https://github.com/devoopsdb/StockDesk")
     {
         _logger = logger;
         try

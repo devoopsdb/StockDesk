@@ -9,15 +9,10 @@ on:
   workflow_dispatch:
     inputs:
       release_version:
-        description: 'Release version (e.g. 1.0.0). If empty and tag not present, defaults to 1.0.0'
+        description: 'Release version (e.g. 1.0.0). If empty, defaults to 1.0.0 or tag'
         required: false
         type: string
-        default: ''
-      force_release:
-        description: 'Force publish GitHub Release'
-        required: false
-        type: boolean
-        default: false
+        default: '1.0.0'
 
 jobs:
   # -------------------------------------------------------------
@@ -50,7 +45,7 @@ jobs:
   release:
     name: Build, Sign & Publish Release
     needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && github.event.inputs.force_release == true)
+    if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
     runs-on: windows-latest
     permissions:
       contents: write

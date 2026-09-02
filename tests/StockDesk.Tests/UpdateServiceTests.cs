@@ -9,7 +9,7 @@ public class UpdateServiceTests
     [Fact]
     public async Task CheckForUpdatesAsync_WhenNotPackaged_ReturnsFalseGracefully()
     {
-        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/mhajizada/StockDesk");
+        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/devoopsdb/StockDesk");
 
         Assert.False(service.IsInstalled);
 
@@ -23,7 +23,7 @@ public class UpdateServiceTests
     [Fact]
     public void CurrentVersion_ReturnsNonEmptyVersion()
     {
-        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/mhajizada/StockDesk");
+        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/devoopsdb/StockDesk");
 
         var version = service.CurrentVersion;
 
@@ -33,7 +33,7 @@ public class UpdateServiceTests
     [Fact]
     public async Task DownloadUpdatesAsync_WhenNotInstalled_ReturnsFalse()
     {
-        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/mhajizada/StockDesk");
+        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/devoopsdb/StockDesk");
 
         var success = await service.DownloadUpdatesAsync();
 
@@ -43,7 +43,7 @@ public class UpdateServiceTests
     [Fact]
     public void ApplyUpdatesAndRestart_WhenNotInstalled_DoesNotThrow()
     {
-        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/mhajizada/StockDesk");
+        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/devoopsdb/StockDesk");
 
         var exception = Record.Exception(() => service.ApplyUpdatesAndRestart());
 
