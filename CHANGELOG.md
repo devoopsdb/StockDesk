@@ -14,3 +14,4 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed bug where entered initial product quantity in `ProductDialog` reverted to default (1) upon clicking save.
 - Fixed bug where entered replenishment quantity in `ReplenishDialog` reverted to default (1) upon confirming inflow.
 - Fixed quantity binding and focus handling in `WriteOffDialog` to prevent entered write-off quantities from falling back to default values.
+- Fixed visual clipping of table row selection checkboxes in `MainWindow` by resetting CheckBox padding and minimum dimensions.
