@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.4] — 2026-09-03
+
 ### Added
 - Added current application version to the main window title bar (`StockDesk v{version} - Operativ Anbar Uçotu`).
 - Reusable `QuantityStepper` UserControl with segmented `[ − ] [ value ] [ + ]` layout, automatic button boundary disabling, direct numeric typing without clear buttons, and mouse wheel / keyboard arrow support.
