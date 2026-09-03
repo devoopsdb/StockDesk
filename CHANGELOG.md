@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Interactive manual update check button in the top action bar of `MainWindow` with loading spinner, pending update dot badge, and automated disabled state to prevent duplicate clicks.
+- Modern Fluent 2 modal dialog (`UpdateDialog.xaml`) and `UpdateDialogViewModel` fully localized in Azerbaijani, presenting release notes, digital security authenticity confirmation, real-time download progress percentage, seamless restart triggers, up-to-date notifications, and unpackaged dev mode feedback.
+- Progress reporting (`IProgress<int>`) and update state management in `IUpdateService` and `UpdateService`.
+
 ### Fixed
 - Fixed catalog empty state overlay ("Heç bir məhsul tapılmadı") persistently showing over populated product rows by introducing an observable `IsEmptyStateVisible` property on `MainViewModel` and updating `MainWindow.xaml` binding.
 - Fixed `NullToVisibilityConverter` to honor `ConverterParameter="invert"`, restoring neutral placeholder icon display for products without photos across catalog and dialog views.

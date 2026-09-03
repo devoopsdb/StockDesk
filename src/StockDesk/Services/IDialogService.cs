@@ -14,4 +14,5 @@ public interface IDialogService
     void ShowMessage(string title, string message, bool isError = false);
     bool ShowConfirmation(string title, string message);
     string? OpenImageFileDialog();
+    Task ShowUpdateDialogAsync(UpdateCheckResult result);
 }

@@ -62,6 +62,13 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isEmptyStateVisible = true;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CheckForUpdatesCommand))]
+    private bool _isCheckingForUpdates;
+
+    [ObservableProperty]
+    private bool _hasPendingUpdate;
+
     private static readonly Category AllCategoriesFilter = new() { Id = 0, Name = "Bütün kateqoriyalar" };
 
     public MainViewModel(
@@ -74,6 +81,23 @@ public partial class MainViewModel : ObservableObject
         _imageStorageService = imageStorageService;
         _dialogService = dialogService;
         _updateService = updateService;
+
+        _hasPendingUpdate = _updateService.HasPendingUpdate;
+        _updateService.UpdateStateChanged += (s, e) =>
+        {
+            if (System.Windows.Application.Current?.Dispatcher != null &&
+                !System.Windows.Application.Current.Dispatcher.CheckAccess())
+            {
+                System.Windows.Application.Current.Dispatcher.InvokeAsync(() =>
+                {
+                    HasPendingUpdate = _updateService.HasPendingUpdate;
+                });
+            }
+            else
+            {
+                HasPendingUpdate = _updateService.HasPendingUpdate;
+            }
+        };
     }
 
     public async Task InitializeAsync()
@@ -319,4 +343,32 @@ public partial class MainViewModel : ObservableObject
             p.IsSelected = false;
         }
     }
+
+    [RelayCommand(CanExecute = nameof(CanCheckForUpdates))]
+    public async Task CheckForUpdatesAsync()
+    {
+        if (_updateService.IsUpdateDownloaded)
+        {
+            var downloadedResult = new UpdateCheckResult(
+                UpdateStatus.AlreadyDownloaded,
+                _updateService.PendingVersion,
+                _updateService.ReleaseNotes);
+            await _dialogService.ShowUpdateDialogAsync(downloadedResult);
+            return;
+        }
+
+        IsCheckingForUpdates = true;
+        try
+        {
+            var result = await _updateService.CheckForUpdatesAsync();
+            HasPendingUpdate = _updateService.HasPendingUpdate;
+            await _dialogService.ShowUpdateDialogAsync(result);
+        }
+        finally
+        {
+            IsCheckingForUpdates = false;
+        }
+    }
+
+    private bool CanCheckForUpdates => !IsCheckingForUpdates;
 }

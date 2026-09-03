@@ -121,4 +121,18 @@ public class DialogService : IDialogService
 
         return openFileDialog.ShowDialog() == true ? openFileDialog.FileName : null;
     }
+
+    public async Task ShowUpdateDialogAsync(UpdateCheckResult result)
+    {
+        var vm = _serviceProvider.GetRequiredService<UpdateDialogViewModel>();
+        vm.Initialize(result);
+
+        var dialog = new UpdateDialog(vm)
+        {
+            Owner = GetActiveWindow()
+        };
+
+        dialog.ShowDialog();
+        await Task.CompletedTask;
+    }
 }

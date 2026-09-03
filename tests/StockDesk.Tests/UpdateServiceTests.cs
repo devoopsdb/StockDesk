@@ -18,6 +18,20 @@ public class UpdateServiceTests
         Assert.NotNull(result);
         Assert.False(result.IsUpdateAvailable);
         Assert.Null(result.TargetVersion);
+        Assert.Equal(UpdateStatus.DevMode, result.Status);
+    }
+
+    [Fact]
+    public async Task DownloadUpdatesAsync_WithProgressCallback_WhenNotInstalled_ReturnsFalse()
+    {
+        var service = new UpdateService(logger: null, githubRepoUrl: "https://github.com/devoopsdb/StockDesk");
+        var reported = false;
+        var progress = new System.Progress<int>(_ => reported = true);
+
+        var success = await service.DownloadUpdatesAsync(progress);
+
+        Assert.False(success);
+        Assert.False(reported);
     }
 
     [Fact]

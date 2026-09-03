@@ -12,7 +12,46 @@ public class UpdateService : IUpdateService
 {
     private readonly ILogger<UpdateService>? _logger;
     private readonly UpdateManager? _updateManager;
+    private readonly object _lock = new();
     private UpdateInfo? _lastUpdateInfo;
+    private bool _hasPendingUpdate;
+    private bool _isUpdateDownloaded;
+    private string? _pendingVersion;
+    private string? _releaseNotes;
+
+    public event EventHandler? UpdateStateChanged;
+
+    public bool HasPendingUpdate
+    {
+        get { lock (_lock) return _hasPendingUpdate; }
+        private set
+        {
+            lock (_lock) _hasPendingUpdate = value;
+            UpdateStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public bool IsUpdateDownloaded
+    {
+        get { lock (_lock) return _isUpdateDownloaded; }
+        private set
+        {
+            lock (_lock) _isUpdateDownloaded = value;
+            UpdateStateChanged?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    public string? PendingVersion
+    {
+        get { lock (_lock) return _pendingVersion; }
+        private set { lock (_lock) _pendingVersion = value; }
+    }
+
+    public string? ReleaseNotes
+    {
+        get { lock (_lock) return _releaseNotes; }
+        private set { lock (_lock) _releaseNotes = value; }
+    }
 
     public UpdateService(ILogger<UpdateService>? logger = null, string githubRepoUrl = "https://github.com/devoopsdb/StockDesk")
     {
@@ -55,7 +94,7 @@ public class UpdateService : IUpdateService
         if (_updateManager == null || !_updateManager.IsInstalled)
         {
             _logger?.LogInformation("Application is not running in installed/packaged mode. Skipping update check.");
-            return new UpdateCheckResult(false, null, false);
+            return UpdateCheckResult.DevModeResult();
         }
 
         try
@@ -67,20 +106,28 @@ public class UpdateService : IUpdateService
             {
                 var targetVersion = _lastUpdateInfo.TargetFullRelease.Version.ToFullString();
                 _logger?.LogInformation("New update found: version {Version}", targetVersion);
-                return new UpdateCheckResult(true, targetVersion, false);
+
+                PendingVersion = targetVersion;
+                ReleaseNotes = _lastUpdateInfo.TargetFullRelease.NotesMarkdown ?? _lastUpdateInfo.TargetFullRelease.NotesHTML;
+                HasPendingUpdate = true;
+
+                return new UpdateCheckResult(
+                    IsUpdateDownloaded ? UpdateStatus.AlreadyDownloaded : UpdateStatus.UpdateAvailable,
+                    targetVersion,
+                    ReleaseNotes);
             }
 
             _logger?.LogInformation("Application is up to date (current version: {Version})", CurrentVersion);
-            return new UpdateCheckResult(false, null, false);
+            return UpdateCheckResult.UpToDateResult(CurrentVersion);
         }
         catch (Exception ex)
         {
             _logger?.LogError(ex, "Error while checking for updates.");
-            return new UpdateCheckResult(false, null, false);
+            return UpdateCheckResult.Error(ex.Message);
         }
     }
 
-    public async Task<bool> DownloadUpdatesAsync(CancellationToken cancellationToken = default)
+    public async Task<bool> DownloadUpdatesAsync(IProgress<int>? progress = null, CancellationToken cancellationToken = default)
     {
         if (_updateManager == null || !_updateManager.IsInstalled || _lastUpdateInfo == null)
         {
@@ -90,7 +137,8 @@ public class UpdateService : IUpdateService
         try
         {
             _logger?.LogInformation("Downloading update {Version}...", _lastUpdateInfo.TargetFullRelease.Version.ToFullString());
-            await _updateManager.DownloadUpdatesAsync(_lastUpdateInfo);
+            await _updateManager.DownloadUpdatesAsync(_lastUpdateInfo, p => progress?.Report(p), cancellationToken);
+            IsUpdateDownloaded = true;
             _logger?.LogInformation("Update downloaded successfully and ready to apply.");
             return true;
         }

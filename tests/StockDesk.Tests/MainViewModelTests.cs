@@ -18,15 +18,29 @@ public class MockDialogService : IDialogService
     public void ShowMessage(string title, string message, bool isError = false) { }
     public bool ShowConfirmation(string title, string message) => true;
     public string? OpenImageFileDialog() => null;
+    public UpdateCheckResult? LastShownUpdateResult { get; private set; }
+    public Task ShowUpdateDialogAsync(UpdateCheckResult result)
+    {
+        LastShownUpdateResult = result;
+        return Task.CompletedTask;
+    }
 }
 
 public class MockUpdateService : IUpdateService
 {
     public string CurrentVersion { get; set; } = "1.0.3";
-    public bool IsInstalled => false;
+    public bool IsInstalled { get; set; } = false;
+    public bool HasPendingUpdate { get; set; } = false;
+    public bool IsUpdateDownloaded { get; set; } = false;
+    public string? PendingVersion { get; set; }
+    public string? ReleaseNotes { get; set; }
+    public event System.EventHandler? UpdateStateChanged;
+
+    public void TriggerStateChanged() => UpdateStateChanged?.Invoke(this, System.EventArgs.Empty);
+
     public Task<UpdateCheckResult> CheckForUpdatesAsync(System.Threading.CancellationToken cancellationToken = default)
-        => Task.FromResult(new UpdateCheckResult(false, null, false));
-    public Task<bool> DownloadUpdatesAsync(System.Threading.CancellationToken cancellationToken = default)
+        => Task.FromResult(UpdateCheckResult.DevModeResult());
+    public Task<bool> DownloadUpdatesAsync(System.IProgress<int>? progress = null, System.Threading.CancellationToken cancellationToken = default)
         => Task.FromResult(false);
     public void ApplyUpdatesAndRestart() { }
 }
@@ -129,6 +143,57 @@ public class MainViewModelTests
             // Clear search
             vm.SearchText = string.Empty;
             Assert.False(vm.IsEmptyStateVisible);
+        }
+    }
+
+    [Fact]
+    public async Task CheckForUpdatesCommand_WhenAlreadyDownloaded_ShowsAlreadyDownloadedResult()
+    {
+        var (context, connection) = TestDbContextFactory.CreateInMemoryDbContext();
+        using (connection)
+        using (context)
+        {
+            var imageStorage = new ImageStorageService();
+            var recipientService = new RecipientService(context);
+            var inventoryService = new InventoryService(context, recipientService, imageStorage);
+            var dialogService = new MockDialogService();
+            var updateService = new MockUpdateService
+            {
+                IsUpdateDownloaded = true,
+                PendingVersion = "1.2.0",
+                ReleaseNotes = "Ready for restart"
+            };
+
+            var vm = new MainViewModel(inventoryService, imageStorage, dialogService, updateService);
+
+            await vm.CheckForUpdatesCommand.ExecuteAsync(null);
+
+            Assert.NotNull(dialogService.LastShownUpdateResult);
+            Assert.Equal(UpdateStatus.AlreadyDownloaded, dialogService.LastShownUpdateResult.Status);
+            Assert.Equal("1.2.0", dialogService.LastShownUpdateResult.TargetVersion);
+        }
+    }
+
+    [Fact]
+    public void UpdateStateChanged_UpdatesHasPendingUpdateProperty()
+    {
+        var (context, connection) = TestDbContextFactory.CreateInMemoryDbContext();
+        using (connection)
+        using (context)
+        {
+            var imageStorage = new ImageStorageService();
+            var recipientService = new RecipientService(context);
+            var inventoryService = new InventoryService(context, recipientService, imageStorage);
+            var dialogService = new MockDialogService();
+            var updateService = new MockUpdateService { HasPendingUpdate = false };
+
+            var vm = new MainViewModel(inventoryService, imageStorage, dialogService, updateService);
+            Assert.False(vm.HasPendingUpdate);
+
+            updateService.HasPendingUpdate = true;
+            updateService.TriggerStateChanged();
+
+            Assert.True(vm.HasPendingUpdate);
         }
     }
 }

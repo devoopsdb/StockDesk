@@ -44,6 +44,7 @@ public partial class App : Application
                 services.AddTransient<WriteOffDialogViewModel>();
                 services.AddTransient<ReplenishDialogViewModel>();
                 services.AddTransient<HistoryViewModel>();
+                services.AddTransient<UpdateDialogViewModel>();
 
                 // Main Window
                 services.AddSingleton<MainWindow>();
