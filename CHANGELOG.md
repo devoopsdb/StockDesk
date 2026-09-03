@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Added current application version to the main window title bar (`StockDesk v{version} - Operativ Anbar Uçotu`).
+
 ### Fixed
 - Fixed bug where entered initial product quantity in `ProductDialog` reverted to default (1) upon clicking save.
 - Fixed bug where entered replenishment quantity in `ReplenishDialog` reverted to default (1) upon confirming inflow.

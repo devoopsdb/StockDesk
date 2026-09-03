@@ -16,8 +16,11 @@ public partial class MainViewModel : ObservableObject
     private readonly IInventoryService _inventoryService;
     private readonly IImageStorageService _imageStorageService;
     private readonly IDialogService _dialogService;
+    private readonly IUpdateService _updateService;
 
     private readonly List<ProductItemViewModel> _allProducts = new();
+
+    public string WindowTitle => $"StockDesk v{_updateService.CurrentVersion} - Operativ Anbar Uçotu";
 
     public ObservableCollection<Category> CategoryFilters { get; } = new();
     public ObservableCollection<ProductItemViewModel> FilteredProducts { get; } = new();
@@ -61,11 +64,13 @@ public partial class MainViewModel : ObservableObject
     public MainViewModel(
         IInventoryService inventoryService,
         IImageStorageService imageStorageService,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IUpdateService updateService)
     {
         _inventoryService = inventoryService;
         _imageStorageService = imageStorageService;
         _dialogService = dialogService;
+        _updateService = updateService;
     }
 
     public async Task InitializeAsync()

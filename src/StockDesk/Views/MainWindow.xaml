@@ -8,7 +8,7 @@
         xmlns:converters="clr-namespace:StockDesk.Common.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:MainViewModel}"
-        Title="StockDesk - Operativ Anbar Uçotu"
+        Title="{Binding WindowTitle}"
         Icon="pack://application:,,,/Assets/AppIcon.ico"
         Height="720" Width="1100"
         MinHeight="600" MinWidth="900"

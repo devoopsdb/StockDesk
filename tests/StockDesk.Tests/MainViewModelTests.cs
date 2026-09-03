@@ -20,8 +20,38 @@ public class MockDialogService : IDialogService
     public string? OpenImageFileDialog() => null;
 }
 
+public class MockUpdateService : IUpdateService
+{
+    public string CurrentVersion { get; set; } = "1.0.3";
+    public bool IsInstalled => false;
+    public Task<UpdateCheckResult> CheckForUpdatesAsync(System.Threading.CancellationToken cancellationToken = default)
+        => Task.FromResult(new UpdateCheckResult(false, null, false));
+    public Task<bool> DownloadUpdatesAsync(System.Threading.CancellationToken cancellationToken = default)
+        => Task.FromResult(false);
+    public void ApplyUpdatesAndRestart() { }
+}
+
 public class MainViewModelTests
 {
+    [Fact]
+    public void WindowTitle_IncludesCurrentAppVersion()
+    {
+        var (context, connection) = TestDbContextFactory.CreateInMemoryDbContext();
+        using (connection)
+        using (context)
+        {
+            var imageStorage = new ImageStorageService();
+            var recipientService = new RecipientService(context);
+            var inventoryService = new InventoryService(context, recipientService, imageStorage);
+            var dialogService = new MockDialogService();
+            var updateService = new MockUpdateService { CurrentVersion = "1.0.3" };
+
+            var vm = new MainViewModel(inventoryService, imageStorage, dialogService, updateService);
+
+            Assert.Equal("StockDesk v1.0.3 - Operativ Anbar Uçotu", vm.WindowTitle);
+        }
+    }
+
     [Fact]
     public async Task FilteringAndSorting_WorksCorrectly()
     {
@@ -33,6 +63,7 @@ public class MainViewModelTests
             var recipientService = new RecipientService(context);
             var inventoryService = new InventoryService(context, recipientService, imageStorage);
             var dialogService = new MockDialogService();
+            var updateService = new MockUpdateService();
 
             var cat1 = await inventoryService.AddCategoryAsync("Noutbuklar");
             var cat2 = await inventoryService.AddCategoryAsync("Aksessuarlar");
@@ -41,7 +72,7 @@ public class MainViewModelTests
             await inventoryService.AddProductAsync("HP Pavilion", cat1.Id, 5, null);
             await inventoryService.AddProductAsync("Logitech Mouse", cat2.Id, 20, null);
 
-            var vm = new MainViewModel(inventoryService, imageStorage, dialogService);
+            var vm = new MainViewModel(inventoryService, imageStorage, dialogService, updateService);
             await vm.InitializeAsync();
 
             Assert.Equal(3, vm.FilteredProducts.Count);
