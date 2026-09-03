@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Fixed catalog empty state overlay ("Heç bir məhsul tapılmadı") persistently showing over populated product rows by introducing an observable `IsEmptyStateVisible` property on `MainViewModel` and updating `MainWindow.xaml` binding.
+- Fixed `NullToVisibilityConverter` to honor `ConverterParameter="invert"`, restoring neutral placeholder icon display for products without photos across catalog and dialog views.
+
 ## [1.0.4] — 2026-09-03
 
 ### Added

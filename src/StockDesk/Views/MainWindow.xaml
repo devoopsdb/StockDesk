@@ -132,7 +132,7 @@
             <!-- Empty state -->
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
-                        Visibility="{Binding FilteredProducts.Count, Converter={StaticResource NullToVisibilityConverter}, ConverterParameter=invert}">
+                        Visibility="{Binding IsEmptyStateVisible, Converter={StaticResource BoolToVis}}">
                 <ui:SymbolIcon Symbol="Box24"
                                FontSize="64"
                                Foreground="{DynamicResource TextFillColorTertiaryBrush}"

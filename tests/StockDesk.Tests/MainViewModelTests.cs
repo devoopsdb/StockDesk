@@ -95,4 +95,41 @@ public class MainViewModelTests
             Assert.True(vm.IsBulkActionBarVisible);
         }
     }
+
+    [Fact]
+    public async Task IsEmptyStateVisible_UpdatesCorrectlyBasedOnFilteredProducts()
+    {
+        var (context, connection) = TestDbContextFactory.CreateInMemoryDbContext();
+        using (connection)
+        using (context)
+        {
+            var imageStorage = new ImageStorageService();
+            var recipientService = new RecipientService(context);
+            var inventoryService = new InventoryService(context, recipientService, imageStorage);
+            var dialogService = new MockDialogService();
+            var updateService = new MockUpdateService();
+
+            var vm = new MainViewModel(inventoryService, imageStorage, dialogService, updateService);
+
+            // When catalog empty
+            await vm.InitializeAsync();
+            Assert.True(vm.IsEmptyStateVisible);
+
+            // Add product
+            var cat = await inventoryService.AddCategoryAsync("Noutbuklar");
+            await inventoryService.AddProductAsync("Dell Vostro", cat.Id, 10, null);
+
+            await vm.LoadProductsCommand.ExecuteAsync(null);
+            Assert.False(vm.IsEmptyStateVisible);
+
+            // Filter with search that has no matches
+            vm.SearchText = "NonExistentProduct";
+            Assert.True(vm.IsEmptyStateVisible);
+
+            // Clear search
+            vm.SearchText = string.Empty;
+            Assert.False(vm.IsEmptyStateVisible);
+        }
+    }
 }
+

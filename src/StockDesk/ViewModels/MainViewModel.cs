@@ -59,6 +59,9 @@ public partial class MainViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    [ObservableProperty]
+    private bool _isEmptyStateVisible = true;
+
     private static readonly Category AllCategoriesFilter = new() { Id = 0, Name = "Bütün kateqoriyalar" };
 
     public MainViewModel(
@@ -188,6 +191,7 @@ public partial class MainViewModel : ObservableObject
 
         TotalItemsCount = FilteredProducts.Count;
         TotalStockSum = FilteredProducts.Sum(p => p.CurrentBalance);
+        IsEmptyStateVisible = FilteredProducts.Count == 0;
         UpdateSelectionState();
     }
 
