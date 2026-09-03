@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Added current application version to the main window title bar (`StockDesk v{version} - Operativ Anbar Uçotu`).
+- Reusable `QuantityStepper` UserControl with segmented `[ − ] [ value ] [ + ]` layout, automatic button boundary disabling, direct numeric typing without clear buttons, and mouse wheel / keyboard arrow support.
+
+### Changed
+- Replaced `ui:NumberBox` with `QuantityStepper` across all quantity dialogs (`WriteOffDialog`, `ReplenishDialog`, `ProductDialog`), eliminating clear button (`X`) text clipping and replacing vertical chevron spin buttons with intuitive plus/minus controls.
+- Expanded quantity column width in `WriteOffDialog` from 130px to 160px for enhanced visual hierarchy.
 
 ### Fixed
 - Fixed bug where entered initial product quantity in `ProductDialog` reverted to default (1) upon clicking save.

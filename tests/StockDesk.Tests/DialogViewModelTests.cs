@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Data;
+using StockDesk.Controls;
 using StockDesk.Data.Entities;
 using StockDesk.Services;
 using StockDesk.ViewModels;
@@ -135,7 +136,7 @@ public class DialogViewModelTests
     }
 
     [Fact]
-    public void NumberBox_ValueBinding_WithPropertyChanged_SynchronizesWithViewModel()
+    public void QuantityStepper_ValueBinding_WithPropertyChanged_SynchronizesWithViewModel()
     {
         var thread = new Thread(() =>
         {
@@ -149,7 +150,7 @@ public class DialogViewModelTests
                 var dialogService = new MockDialogService();
 
                 var vm = new ProductDialogViewModel(inventoryService, imageStorage, dialogService);
-                var numberBox = new NumberBox();
+                var stepper = new QuantityStepper { Minimum = 0 };
 
                 var binding = new Binding(nameof(ProductDialogViewModel.InitialQuantity))
                 {
@@ -157,19 +158,26 @@ public class DialogViewModelTests
                     Mode = BindingMode.TwoWay,
                     UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged
                 };
-                BindingOperations.SetBinding(numberBox, NumberBox.ValueProperty, binding);
+                BindingOperations.SetBinding(stepper, QuantityStepper.ValueProperty, binding);
 
                 // Initial synchronization
-                Assert.Equal(1.0, numberBox.Value);
+                Assert.Equal(1, stepper.Value);
                 Assert.Equal(1, vm.InitialQuantity);
 
-                // Simulate changing NumberBox.Value to 18
-                numberBox.Value = 18.0;
+                // Simulate changing stepper.Value to 18
+                stepper.Value = 18;
                 Assert.Equal(18, vm.InitialQuantity);
 
                 // Simulate changing VM property
                 vm.InitialQuantity = 42;
-                Assert.Equal(42.0, numberBox.Value);
+                Assert.Equal(42, stepper.Value);
+
+                // Increment and Decrement
+                stepper.Increment();
+                Assert.Equal(43, vm.InitialQuantity);
+
+                stepper.Decrement();
+                Assert.Equal(42, vm.InitialQuantity);
             }
         });
         thread.SetApartmentState(ApartmentState.STA);

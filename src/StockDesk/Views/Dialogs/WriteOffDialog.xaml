@@ -5,11 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:StockDesk.ViewModels"
+        xmlns:controls="clr-namespace:StockDesk.Controls"
         xmlns:converters="clr-namespace:StockDesk.Common.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:WriteOffDialogViewModel}"
         Title="Məhsulun Təhvil Verilməsi (Məxaric)"
-        Height="560" Width="620"
+        Height="560" Width="640"
         WindowStartupLocation="CenterOwner"
         ResizeMode="NoResize"
         ShowInTaskbar="False"
@@ -55,7 +56,7 @@
                                 <ColumnDefinition Width="50" />
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
-                                <ColumnDefinition Width="130" />
+                                <ColumnDefinition Width="160" />
                             </Grid.ColumnDefinitions>
 
                             <!-- Thumbnail -->
@@ -101,12 +102,11 @@
                             <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="10,0,0,0">
                                 <TextBlock Text="Silinən say:"
                                            FontSize="11"
-                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}" />
-                                <ui:NumberBox Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                              Minimum="1"
-                                              Maximum="{Binding Product.CurrentBalance}"
-                                              SpinButtonPlacementMode="Inline"
-                                              SmallChange="1" />
+                                           Foreground="{DynamicResource TextFillColorTertiaryBrush}"
+                                           Margin="0,0,0,4" />
+                                <controls:QuantityStepper Value="{Binding Quantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                         Minimum="1"
+                                                         Maximum="{Binding Product.CurrentBalance}" />
                             </StackPanel>
                         </Grid>
                     </DataTemplate>

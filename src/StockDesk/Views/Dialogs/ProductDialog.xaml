@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
         xmlns:vm="clr-namespace:StockDesk.ViewModels"
+        xmlns:controls="clr-namespace:StockDesk.Controls"
         xmlns:converters="clr-namespace:StockDesk.Common.Converters"
         mc:Ignorable="d"
         d:DataContext="{d:DesignInstance vm:ProductDialogViewModel}"
@@ -120,11 +121,8 @@
                     <TextBlock Text="İlkin say (qalıq)"
                                FontWeight="Medium"
                                Margin="0,0,0,6" />
-                    <ui:NumberBox Value="{Binding InitialQuantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                  Minimum="0"
-                                  SpinButtonPlacementMode="Inline"
-                                  SmallChange="1"
-                                  LargeChange="10" />
+                    <controls:QuantityStepper Value="{Binding InitialQuantity, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                             Minimum="0" />
                 </StackPanel>
 
             </StackPanel>
