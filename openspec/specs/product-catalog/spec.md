@@ -66,3 +66,10 @@ The system SHALL allow users to select multiple products via checkboxes to activ
 #### Scenario: Unobstructed checkbox display
 - **WHEN** product catalog rows are rendered in unselected or selected state
 - **THEN** each selection checkbox SHALL be fully visible with complete borders and centered checkmark without clipping or overlap from adjacent elements
+
+### Requirement: Product Catalog Date Display
+The product catalog table SHALL display the product creation date as a calendar date in `dd.MM.yyyy` format without any time component.
+
+#### Scenario: Displaying product creation date
+- **WHEN** product items are displayed in the catalog table
+- **THEN** the addition date column ("Əlavə tarixi") renders only the calendar date formatted as `dd.MM.yyyy`

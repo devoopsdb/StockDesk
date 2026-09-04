@@ -12,7 +12,11 @@ The system SHALL create timestamped, non-editable audit records for every stock 
 - **THEN** system immediately generates an immutable record with current system timestamp and captured snapshot values
 
 ### Requirement: History Journal View and Filtering
-The system SHALL display operations in descending chronological order with color-coded operation badges and support multi-field filtering.
+The system SHALL display operations in descending chronological order with color-coded operation badges, separate dedicated single-line columns for calendar date and time of day, and support multi-field filtering.
+
+#### Scenario: Separate date and time columns
+- **WHEN** the history journal table is displayed
+- **THEN** operation records display the date in a dedicated "Tarix" column (`dd.MM.yyyy`) and time in a dedicated "Saat" column (`HH:mm`) on the same row
 
 #### Scenario: Color-coded type display
 - **WHEN** the history journal is opened
