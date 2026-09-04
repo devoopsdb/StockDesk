@@ -5,7 +5,7 @@ rem StockDesk Automated Release Script (Hybrid Batch / PowerShell)
 rem ============================================================================
 set "SCRIPT_PATH=%~f0"
 set "SCRIPT_ARGS=%*"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$scriptPath = $env:SCRIPT_PATH; $argsRaw = $env:SCRIPT_ARGS; & { $lines = [System.IO.File]::ReadAllLines($scriptPath); $idx = [array]::IndexOf($lines, '#POWERSHELL_START'); if ($idx -ge 0) { $code = ($lines[($idx+1)..($lines.Length-1)] -join [Environment]::NewLine); [string[]]$parsedArgs = if ($argsRaw.Trim()) { $argsRaw.Trim() -split '\s+' } else { @() }; & ([ScriptBlock]::Create($code)) @parsedArgs } else { Write-Host 'Marker #POWERSHELL_START not found' -ForegroundColor Red; exit 1 } }"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$scriptPath = $env:SCRIPT_PATH; $argsRaw = $env:SCRIPT_ARGS; & { $lines = [System.IO.File]::ReadAllLines($scriptPath); $idx = [array]::IndexOf($lines, '#POWERSHELL_START'); if ($idx -ge 0) { $code = ($lines[($idx+1)..($lines.Length-1)] -join [Environment]::NewLine); [string[]]$parsedArgs = if ($argsRaw -and $argsRaw.Trim()) { $argsRaw.Trim() -split '\s+' } else { @() }; & ([ScriptBlock]::Create($code)) @parsedArgs } else { Write-Host 'Marker #POWERSHELL_START not found' -ForegroundColor Red; exit 1 } }"
 exit /b %ERRORLEVEL%
 
 #POWERSHELL_START
