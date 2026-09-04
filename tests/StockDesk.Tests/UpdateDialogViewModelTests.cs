@@ -11,7 +11,7 @@ public class UpdateDialogViewModelTests
 {
     private class FakeUpdateService : IUpdateService
     {
-        public string CurrentVersion { get; set; } = "1.0.4";
+        public string CurrentVersion { get; set; } = "1.0.5";
         public bool IsInstalled { get; set; } = true;
         public bool HasPendingUpdate { get; set; } = false;
         public bool IsUpdateDownloaded { get; set; } = false;
@@ -52,7 +52,7 @@ public class UpdateDialogViewModelTests
     [Fact]
     public void Initialize_WithUpdateAvailable_SetsModeAndProperties()
     {
-        var service = new FakeUpdateService { CurrentVersion = "1.0.4" };
+        var service = new FakeUpdateService { CurrentVersion = "1.0.5" };
         var vm = new UpdateDialogViewModel(service);
 
         vm.Initialize(UpdateCheckResult.Available("1.1.0", "Fixed table rendering"));
@@ -62,13 +62,13 @@ public class UpdateDialogViewModelTests
         Assert.False(vm.IsChecking);
         Assert.Equal("1.1.0", vm.TargetVersion);
         Assert.Equal("Fixed table rendering", vm.ReleaseNotes);
-        Assert.Equal("1.0.4", vm.CurrentVersion);
+        Assert.Equal("1.0.5", vm.CurrentVersion);
     }
 
     [Fact]
     public void Initialize_WithAlreadyDownloaded_SetsReadyToRestart()
     {
-        var service = new FakeUpdateService { CurrentVersion = "1.0.4", PendingVersion = "1.1.0" };
+        var service = new FakeUpdateService { CurrentVersion = "1.0.5", PendingVersion = "1.1.0" };
         var vm = new UpdateDialogViewModel(service);
 
         vm.Initialize(new UpdateCheckResult(UpdateStatus.AlreadyDownloaded, "1.1.0", "Ready to install"));
@@ -81,10 +81,10 @@ public class UpdateDialogViewModelTests
     [Fact]
     public void Initialize_WithUpToDate_SetsUpToDateMode()
     {
-        var service = new FakeUpdateService { CurrentVersion = "1.0.4" };
+        var service = new FakeUpdateService { CurrentVersion = "1.0.5" };
         var vm = new UpdateDialogViewModel(service);
 
-        vm.Initialize(UpdateCheckResult.UpToDateResult("1.0.4"));
+        vm.Initialize(UpdateCheckResult.UpToDateResult("1.0.5"));
 
         Assert.Equal(UpdateDialogMode.UpToDate, vm.CurrentMode);
         Assert.True(vm.IsUpToDate);
