@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] — 2026-09-04
+
 ### Changed
 
 - Updated product catalog table (`MainWindow.xaml`) to display addition date (`CreatedAt`) strictly as a calendar date in `dd.MM.yyyy` format without time, narrowing column width to 110px.
