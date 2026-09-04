@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Updated product catalog table (`MainWindow.xaml`) to display addition date (`CreatedAt`) strictly as a calendar date in `dd.MM.yyyy` format without time, narrowing column width to 110px.
+- Split the combined date and time column in the operation history journal (`HistoryWindow.xaml`) into two dedicated columns: `Tarix` (`dd.MM.yyyy`, 105px) and `Saat` (`HH:mm`, 75px), maintaining native chronological sorting on both column headers.
+
 ## [1.0.6] — 2026-09-04
 
 ## [1.0.5] — 2026-09-04

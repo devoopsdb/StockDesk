@@ -293,8 +293,8 @@
 
                     <!-- Created Date -->
                     <DataGridTextColumn Header="Əlavə tarixi"
-                                        Binding="{Binding CreatedAt, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
-                                        Width="140" />
+                                        Binding="{Binding CreatedAt, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                        Width="110" />
 
                     <!-- Actions Column -->
                     <DataGridTemplateColumn Header="Əməliyyat" Width="260">

@@ -133,10 +133,15 @@
                       BorderThickness="0"
                       SelectionMode="Single">
                 <DataGrid.Columns>
-                    <!-- Date & Time -->
-                    <DataGridTextColumn Header="Tarix və Saat"
-                                        Binding="{Binding Timestamp, StringFormat='{}{0:dd.MM.yyyy HH:mm}'}"
-                                        Width="130" />
+                    <!-- Date -->
+                    <DataGridTextColumn Header="Tarix"
+                                        Binding="{Binding Timestamp, StringFormat='{}{0:dd.MM.yyyy}'}"
+                                        Width="105" />
+
+                    <!-- Time -->
+                    <DataGridTextColumn Header="Saat"
+                                        Binding="{Binding Timestamp, StringFormat='{}{0:HH:mm}'}"
+                                        Width="75" />
 
                     <!-- Operation Type Badge -->
                     <DataGridTemplateColumn Header="Əməliyyat Növü" Width="140">
